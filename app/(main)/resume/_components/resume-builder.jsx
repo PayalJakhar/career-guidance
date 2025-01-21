@@ -148,7 +148,7 @@ export default function ResumeBuilder({ initialContent }) {
 
   return (
     <div data-color-mode="light" className="space-y-4">
-      <div className="flex flex-col md:flex-row justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-2">
         <h1 className="font-bold gradient-title text-5xl">Resume Builder</h1>
         <div className="space-x-2">
           <Button
