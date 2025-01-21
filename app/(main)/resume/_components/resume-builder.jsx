@@ -181,28 +181,6 @@ export default function ResumeBuilder({ initialContent }) {
               </>
             )}
           </Button>
-          {activeTab === "preview" && (
-            <Button
-              variant="outline"
-              type="button"
-              className="pt-2"
-              onClick={() =>
-                setResumeMode(resumeMode === "preview" ? "live" : "preview")
-              }
-            >
-              {resumeMode === "preview" ? (
-                <>
-                  <Edit className="h-4 w-4" />
-                  Edit Markdown
-                </>
-              ) : (
-                <>
-                  <Monitor className="h-4 w-4" />
-                  Show Preview
-                </>
-              )}
-            </Button>
-          )}
         </div>
       </div>
 
@@ -382,6 +360,29 @@ export default function ResumeBuilder({ initialContent }) {
         </TabsContent>
 
         <TabsContent value="preview">
+          {activeTab === "preview" && (
+            <Button
+              variant="link"
+              type="button"
+              className="mb-2"
+              onClick={() =>
+                setResumeMode(resumeMode === "preview" ? "edit" : "preview")
+              }
+            >
+              {resumeMode === "preview" ? (
+                <>
+                  <Edit className="h-4 w-4" />
+                  Edit Resume
+                </>
+              ) : (
+                <>
+                  <Monitor className="h-4 w-4" />
+                  Show Preview
+                </>
+              )}
+            </Button>
+          )}
+
           {activeTab === "preview" && resumeMode !== "preview" && (
             <div className="flex p-3 gap-2 items-center border-2 border-yellow-600 text-yellow-600 rounded mb-2">
               <AlertTriangle className="h-5 w-5" />
