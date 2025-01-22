@@ -13,7 +13,6 @@ export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
 
   if (!userId && isProtectedRoute(req)) {
-    // add onboarding routing
     const { redirectToSignIn } = await auth();
     return redirectToSignIn();
   }

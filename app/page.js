@@ -91,45 +91,18 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Trophy className="w-8 h-8 text-primary" />
+            {howItWorks.map((item, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center text-center space-y-4"
+              >
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <item.Icon className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-semibold text-xl">{item.title}</h3>
+                <p className="text-muted-foreground">{item.description}</p>
               </div>
-              <h3 className="font-semibold text-xl">Build Your Resume</h3>
-              <p className="text-muted-foreground">
-                Create an ATS-optimized resume with AI assistance
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Target className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="font-semibold text-xl">Get AI Feedback</h3>
-              <p className="text-muted-foreground">
-                Receive personalized suggestions and improvement tips
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="font-semibold text-xl">Practice Interviews</h3>
-              <p className="text-muted-foreground">
-                Prepare with AI-generated role-specific questions
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <CheckCircle2 className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="font-semibold text-xl">Track Progress</h3>
-              <p className="text-muted-foreground">
-                Monitor your improvement with detailed analytics
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>

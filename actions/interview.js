@@ -78,8 +78,6 @@ export async function saveQuizResult(questions, answers, score) {
   // Get wrong answers
   const wrongAnswers = questionResults.filter((q) => !q.isCorrect);
 
-  console.log(wrongAnswers);
-
   // Only generate improvement tips if there are wrong answers
   let improvementTip = null;
   if (wrongAnswers.length > 0) {
@@ -146,7 +144,7 @@ export async function getAssessments() {
         userId: user.id,
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
     });
 
