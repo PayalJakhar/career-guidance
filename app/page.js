@@ -20,6 +20,7 @@ import Image from "next/image";
 import { features } from "@/data/features";
 import { testimonial } from "@/data/testimonial";
 import { faqs } from "@/data/faqs";
+import { howItWorks } from "@/data/howItWorks";
 
 export default function LandingPage() {
   return (
@@ -97,7 +98,7 @@ export default function LandingPage() {
                 className="flex flex-col items-center text-center space-y-4"
               >
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  <item.Icon className="w-8 h-8 text-primary" />
+                  {item.icon}
                 </div>
                 <h3 className="font-semibold text-xl">{item.title}</h3>
                 <p className="text-muted-foreground">{item.description}</p>
