@@ -1,8 +1,7 @@
 "use client";
 
-import { Trophy, CheckCircle2, XCircle } from "lucide-react";
+import { Trophy, CheckCircle2, XCircle, RotateCcw, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CardContent, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export default function QuizResult({
@@ -12,60 +11,138 @@ export default function QuizResult({
 }) {
   if (!result) return null;
 
+  const score = result.quizScore;
+  const correct = result.questions.filter((q) => q.isCorrect).length;
+  const wrong = result.questions.length - correct;
+
+  const scoreColor =
+    score >= 80
+      ? "text-emerald-500"
+      : score >= 60
+      ? "text-amber-500"
+      : "text-red-500";
+  const scorePanelBorder =
+    score >= 80
+      ? "border-emerald-500/30"
+      : score >= 60
+      ? "border-amber-500/30"
+      : "border-red-500/30";
+  const scorePanelBg =
+    score >= 80
+      ? "bg-emerald-500/5"
+      : score >= 60
+      ? "bg-amber-500/5"
+      : "bg-red-500/5";
+  const scoreLabel =
+    score >= 80 ? "Excellent!" : score >= 60 ? "Good Job!" : "Keep Practicing";
+
   return (
-    <div className="mx-auto">
-      <h1 className="flex items-center gap-2 text-3xl gradient-title">
-        <Trophy className="h-6 w-6 text-yellow-500" />
-        Quiz Results
-      </h1>
+    <div className="space-y-5">
+      {/* Score hero panel */}
+      <div
+        className={`rounded-2xl border-2 ${scorePanelBorder} ${scorePanelBg} p-8 text-center`}
+      >
+        <Trophy className={`h-10 w-10 mx-auto mb-3 ${scoreColor}`} />
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+          {scoreLabel}
+        </p>
+        <p className={`text-8xl font-black leading-none ${scoreColor}`}>
+          {score.toFixed(0)}
+          <span className="text-4xl">%</span>
+        </p>
+        <Progress value={score} className="mt-6 h-2 max-w-xs mx-auto" />
 
-      <CardContent className="space-y-6">
-        {/* Score Overview */}
-        <div className="text-center space-y-2">
-          <h3 className="text-2xl font-bold">{result.quizScore.toFixed(1)}%</h3>
-          <Progress value={result.quizScore} className="w-full" />
-        </div>
-
-        {/* Improvement Tip */}
-        {result.improvementTip && (
-          <div className="bg-muted p-4 rounded-lg">
-            <p className="font-medium">Improvement Tip:</p>
-            <p className="text-muted-foreground">{result.improvementTip}</p>
+        {/* Correct / Wrong / Total */}
+        <div className="flex justify-center gap-8 mt-6">
+          <div className="text-center">
+            <p className="text-3xl font-black text-emerald-500">{correct}</p>
+            <p className="text-xs text-muted-foreground mt-1">Correct</p>
           </div>
-        )}
+          <div className="w-px bg-border" />
+          <div className="text-center">
+            <p className="text-3xl font-black text-red-500">{wrong}</p>
+            <p className="text-xs text-muted-foreground mt-1">Wrong</p>
+          </div>
+          <div className="w-px bg-border" />
+          <div className="text-center">
+            <p className="text-3xl font-black">{result.questions.length}</p>
+            <p className="text-xs text-muted-foreground mt-1">Total</p>
+          </div>
+        </div>
+      </div>
 
-        {/* Questions Review */}
-        <div className="space-y-4">
-          <h3 className="font-medium">Question Review</h3>
+      {/* Improvement tip */}
+      {result.improvementTip && (
+        <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-5">
+          <div className="flex items-center gap-2 text-primary font-bold text-sm mb-2">
+            <Lightbulb className="h-4 w-4" />
+            Improvement Tip
+          </div>
+          <p className="text-sm leading-relaxed">{result.improvementTip}</p>
+        </div>
+      )}
+
+      {/* Question review */}
+      <div>
+        <h3 className="text-lg font-bold mb-4">Question Review</h3>
+        <div className="space-y-3">
           {result.questions.map((q, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <p className="font-medium">{q.question}</p>
+            <div
+              key={index}
+              className={`rounded-xl border-2 p-4 ${
+                q.isCorrect
+                  ? "border-emerald-500/25 bg-emerald-500/5"
+                  : "border-red-500/25 bg-red-500/5"
+              }`}
+            >
+              <div className="flex items-start gap-3">
                 {q.isCorrect ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                 ) : (
-                  <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                  <XCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
                 )}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <p>Your answer: {q.userAnswer}</p>
-                {!q.isCorrect && <p>Correct answer: {q.answer}</p>}
-              </div>
-              <div className="text-sm bg-muted p-2 rounded">
-                <p className="font-medium">Explanation:</p>
-                <p>{q.explanation}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">{q.question}</p>
+                  <div className="text-xs text-muted-foreground mt-2 space-y-0.5">
+                    <p>
+                      Your answer:{" "}
+                      <span
+                        className={`font-medium ${
+                          q.isCorrect
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {q.userAnswer}
+                      </span>
+                    </p>
+                    {!q.isCorrect && (
+                      <p>
+                        Correct answer:{" "}
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                          {q.answer}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground/70">
+                      Explanation:{" "}
+                    </span>
+                    {q.explanation}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
-      </CardContent>
+      </div>
 
       {!hideStartNew && (
-        <CardFooter>
-          <Button onClick={onStartNew} className="w-full">
-            Start New Quiz
-          </Button>
-        </CardFooter>
+        <Button onClick={onStartNew} className="w-full gap-2" size="lg">
+          <RotateCcw className="h-4 w-4" />
+          Start New Quiz
+        </Button>
       )}
     </div>
   );
