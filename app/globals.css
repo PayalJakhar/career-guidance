@@ -6,61 +6,79 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* ========================
+   🌸 LIGHT BLUE + PINK THEME
+   ======================== */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    /* Main palette based on your image */
+    --background: 190 45% 95%;      /* Based on #BADFE7 (very light version) */
+    --foreground: 185 41% 15%;      /* Darker version of #388087 for text */
+
+    --card: 190 45% 98%;
+    --card-foreground: 185 41% 15%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --popover-foreground: 185 41% 15%;
+
+    --primary: 185 41% 37%;         /* #388087 - Deep Teal */
+    --primary-foreground: 190 45% 98%;
+
+    --secondary: 185 36% 58%;       /* #6FB3B8 - Medium Aqua */
+    --secondary-foreground: 185 41% 15%;
+
+    --muted: 190 45% 82%;           /* #BADFE7 - Soft Mint */
+    --muted-foreground: 185 20% 35%;
+
+    --accent: 185 36% 58%;          /* #6FB3B8 */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 185 30% 85%;
+    --input: 185 30% 85%;
+    --ring: 185 41% 37%;
+
     --radius: 0.5rem;
   }
+
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 185 41% 10%;      /* Dark Teal Background */
+    --foreground: 190 45% 92%;      /* Light Mint Text */
+
+    --card: 185 41% 14%;
+    --card-foreground: 190 45% 92%;
+
+    --primary: 185 36% 58%;         /* #6FB3B8 becomes primary in dark mode */
+    --primary-foreground: 185 41% 10%;
+
+    --secondary: 185 41% 37%;       /* #388087 */
+    --secondary-foreground: 190 45% 92%;
+
+    --accent: 190 45% 82%;          /* #BADFE7 as neon accent */
+    --accent-foreground: 185 41% 10%;
+
+    --border: 185 41% 25%;
+    --ring: 185 36% 58%;
   }
 }
+
+@layer utilities {
+  /* Updated Gradient to match your new colors */
+  .gradient {
+    @apply bg-gradient-to-r from-[#388087] via-[#6FB3B8] to-[#BADFE7];
+  }
+
+  .gradient-title {
+    @apply gradient font-extrabold tracking-tighter text-transparent bg-clip-text pb-2 pr-2;
+  }
+}
+
+/* ========================
+   APPLY BASE STYLES
+   ======================== */
 
 @layer base {
   * {
@@ -71,21 +89,30 @@ body {
   }
 }
 
+/* ========================
+   UTILITIES
+   ======================== */
+
 @layer utilities {
+  /* Gradient for titles using image colors */
   .gradient {
-    @apply bg-gradient-to-b from-gray-400 via-gray-200 to-gray-600;
+    @apply bg-gradient-to-r from-[#388087] via-[#6FB3B8] to-[#BADFE7];
   }
+
   .gradient-title {
     @apply gradient font-extrabold tracking-tighter text-transparent bg-clip-text pb-2 pr-2;
   }
 }
+
+/* ========================
+   HERO IMAGE EFFECT
+   ======================== */
 
 .hero-image-wrapper {
   perspective: 1000px;
 }
 
 .hero-image {
-  /* transform: rotateX(20deg) scale(0.9) translateY(-50); */
   transform: rotateX(15deg) scale(1);
   transition: transform 0.5s ease-out;
   will-change: transform;
@@ -95,29 +122,80 @@ body {
   transform: rotateX(0deg) scale(1) translateY(40px);
 }
 
+/* ========================
+   LIGHT GRID BACKGROUND
+   ======================== */
+
+/* ========================
+   LIGHT GRID BACKGROUND
+   ======================== */
+
 .grid-background {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
+  background: 
+    linear-gradient(
       to right,
-      rgba(255, 255, 255, 0.1) 1px,
+      rgba(111, 179, 184, 0.1) 1px, /* Medium Aqua #6FB3B8 */
       transparent 1px
     ),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 50px 50px;
+    linear-gradient(
+      to bottom,
+      rgba(56, 128, 135, 0.05) 1px, /* Deep Teal #388087 */
+      transparent 1px
+    );
+  background-size: 60px 60px;
   pointer-events: none;
   z-index: -1;
 }
 
+/* Soft radial glow using the light mint #BADFE7 */
 .grid-background::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, transparent, rgba(0, 0, 0, 0.9));
+  inset: 0;
+  background: radial-gradient(
+    circle at top,
+    rgba(186, 223, 231, 0.4), /* Light Mint Glow */
+    rgba(111, 179, 184, 0.2), /* Soft Aqua Fade */
+    transparent 70%
+  );
 }
+
+
+/* Floating bot animation */
+@keyframes floaty {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-floaty {
+  animation: floaty 3s ease-in-out infinite;
+}
+
+/* Hide scrollbar inside chatbot */
+.chat-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* HI speech bubble tail */
+/* .hi-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 14px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #22d3ee;
+} */
