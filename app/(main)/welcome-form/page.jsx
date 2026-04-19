@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { completeProfile } from "@/actions/CompleteProfile";
+import { completeProfile } from "@/actions/user";
 
 const STATE_CITY_MAP = {
   Karnataka: ["Bengaluru", "Mysuru", "Mangaluru"],
