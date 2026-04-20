@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { auth } from "@clerk/nextjs/server";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -77,11 +80,11 @@ export async function POST(request) {
     let extractedText = "";
 
     if (file.type === "application/pdf") {
-      const pdfParse = (await import("pdf-parse")).default;
+      const pdfParse = require("pdf-parse");
       const data = await pdfParse(buffer);
       extractedText = data.text;
     } else {
-      const mammoth = await import("mammoth");
+      const mammoth = require("mammoth");
       const result = await mammoth.extractRawText({ buffer });
       extractedText = result.value;
     }
