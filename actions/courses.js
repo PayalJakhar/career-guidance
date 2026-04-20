@@ -2,8 +2,31 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { generateEmbedding, buildUserQueryText } from "@/lib/ml/embeddings";
-import { cosineSimilarity } from "@/lib/ml/similarity";
+import { buildVocabulary, tokenize, vectorize, cosineUnit } from "@/lib/ml/tfidf";
+
+function buildCourseText(course) {
+  return [
+    course.title,
+    course.description,
+    `Skills: ${course.skills.join(" ")}`,
+    `Category: ${course.category}`,
+    `Level: ${course.level}`,
+  ].join(". ");
+}
+
+function buildUserQueryText({ targetRole, targetLevel, currentRole, industry, skills, missingSkills }) {
+  const parts = [];
+  if (targetRole) parts.push(`I want to become a ${targetRole}.`);
+  if (targetLevel) parts.push(`Targeting ${targetLevel} level.`);
+  if (currentRole) parts.push(`Currently working as ${currentRole}.`);
+  if (industry) parts.push(`In the ${industry} industry.`);
+  if (skills?.length) parts.push(`My existing skills: ${skills.join(", ")}.`);
+  if (missingSkills?.length) {
+    parts.push(`I need to learn: ${missingSkills.join(", ")}.`);
+    parts.push(`${missingSkills.join(" ")} ${missingSkills.join(" ")}.`);
+  }
+  return parts.join(" ") || "General career development courses";
+}
 
 export async function getRecommendedCourses({ filters = {} } = {}) {
   const { userId } = await auth();
@@ -18,9 +41,7 @@ export async function getRecommendedCourses({ filters = {} } = {}) {
       industry: true,
       skills: true,
       industryInsight: {
-        select: {
-          recommendedSkills: true,
-        },
+        select: { recommendedSkills: true },
       },
     },
   });
@@ -42,18 +63,35 @@ export async function getRecommendedCourses({ filters = {} } = {}) {
     missingSkills,
   });
 
-  const userEmbedding = await generateEmbedding(queryText);
-
   const where = {};
   if (filters.category) where.category = filters.category;
   if (filters.level) where.level = filters.level;
 
-  const courses = await db.course.findMany({ where });
+  const allCourses = await db.course.findMany({ where });
 
-  const scored = courses
-    .map((course) => ({
+  if (allCourses.length === 0) {
+    return {
+      courses: [],
+      userContext: {
+        targetRole: user.targetRole,
+        targetLevel: user.targetLevel,
+        currentRole: user.role,
+        industry: user.industry,
+        missingSkills,
+      },
+    };
+  }
+
+  const courseTexts = allCourses.map(buildCourseText);
+  const { vocab, idf, tokenized } = buildVocabulary(courseTexts);
+
+  const courseVectors = tokenized.map((tokens) => vectorize(tokens, vocab, idf));
+  const queryVector = vectorize(tokenize(queryText), vocab, idf);
+
+  const scored = allCourses
+    .map((course, i) => ({
       ...course,
-      matchScore: Math.round(cosineSimilarity(userEmbedding, course.embedding) * 100),
+      matchScore: Math.round(cosineUnit(queryVector, courseVectors[i]) * 100),
     }))
     .sort((a, b) => b.matchScore - a.matchScore);
 
