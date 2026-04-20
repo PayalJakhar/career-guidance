@@ -80,6 +80,7 @@ export default function ResumeAnalysis({ analysis, onReset }) {
     overallScore,
     scoreLabel,
     summary,
+    targetRoleFit,
     strengths = [],
     improvements = [],
     missingSkills = [],
@@ -111,6 +112,15 @@ export default function ResumeAnalysis({ analysis, onReset }) {
             <div className="flex-1 space-y-2">
               <h3 className="font-semibold text-lg">Overall Assessment</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{summary}</p>
+              {targetRoleFit && (
+                <div className="flex items-start gap-2 mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                  <Target className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+                  <div>
+                    <span className="font-medium text-blue-700">Target Role Fit: </span>
+                    <span className="text-blue-700">{targetRoleFit}</span>
+                  </div>
+                </div>
+              )}
               {quantificationTip && (
                 <div className="flex items-start gap-2 mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm">
                   <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />

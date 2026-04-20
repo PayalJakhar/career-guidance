@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { auth } from "@clerk/nextjs/server";
+import { db } from "@/lib/prisma";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
@@ -8,34 +9,51 @@ const require = createRequire(import.meta.url);
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-const ANALYSIS_PROMPT = (text) => `
-You are an expert resume reviewer and career coach. Analyze the following resume text thoroughly and return ONLY a valid JSON object (no markdown, no extra text) with this exact structure:
+const ANALYSIS_PROMPT = (text, userProfile) => `
+You are an expert resume reviewer and career coach. Analyze the following resume against the candidate's career goals below.
+
+CANDIDATE'S CAREER PROFILE:
+- Current Role: ${userProfile.currentRole || "Not specified"}
+- Target Role: ${userProfile.targetRole || "Not specified"}
+- Target Level: ${userProfile.targetLevel || "Not specified"}
+- Industry: ${userProfile.industry || "Not specified"}
+- Years of Experience: ${userProfile.experience ?? "Not specified"}
+- Existing Skills: ${userProfile.skills?.length ? userProfile.skills.join(", ") : "Not specified"}
+
+Use the candidate's Target Role, Target Level, and Industry to personalize every section of your analysis. Specifically:
+- "missingSkills" must list skills required for the Target Role and Target Level that are NOT already in the resume
+- "keywordSuggestions" must be keywords commonly scanned by ATS systems for the Target Role in the given Industry
+- "improvements" should explicitly align the resume with the Target Role
+- "sectionFeedback.experience" should call out mismatches between current experience and what's expected for the Target Role/Level
+
+Return ONLY a valid JSON object (no markdown, no extra text) with this exact structure:
 
 {
-  "overallScore": <integer 0-100>,
+  "overallScore": <integer 0-100 — score the resume's readiness for the TARGET role, not the current role>,
   "scoreLabel": "<one of: Excellent | Good | Average | Needs Improvement>",
-  "summary": "<2-3 sentence overall assessment of the resume>",
-  "strengths": ["<specific strength>", "<specific strength>", "<specific strength>"],
+  "summary": "<2-3 sentence assessment mentioning the target role fit>",
+  "targetRoleFit": "<1-2 sentence verdict on how ready the candidate is for ${userProfile.targetRole || "their target role"}>",
+  "strengths": ["<specific strength relevant to the target role>", "<strength>", "<strength>"],
   "improvements": [
-    { "area": "<area name>", "issue": "<what is wrong>", "suggestion": "<how to fix it>" }
+    { "area": "<area name>", "issue": "<what's wrong for the target role>", "suggestion": "<how to fix it>" }
   ],
-  "missingSkills": ["<skill>", "<skill>"],
-  "atsOptimization": ["<ATS tip>", "<ATS tip>"],
+  "missingSkills": ["<skill required for target role but missing>", "<skill>"],
+  "atsOptimization": ["<ATS tip specific to target role>", "<tip>"],
   "sectionFeedback": {
     "contactInfo": "<feedback or 'Not found' if missing>",
     "summary": "<feedback on professional summary or 'Missing - strongly recommended'>",
-    "experience": "<feedback on work experience section>",
+    "experience": "<feedback aligned with target role/level expectations>",
     "education": "<feedback on education section>",
-    "skills": "<feedback on skills section>"
+    "skills": "<feedback comparing skills to target role requirements>"
   },
   "formatAndStructure": "<feedback on overall format, length, readability, and structure>",
-  "keywordSuggestions": ["<keyword>", "<keyword>", "<keyword>"],
+  "keywordSuggestions": ["<keyword for target role>", "<keyword>", "<keyword>"],
   "actionVerbs": {
     "used": ["<verb found in resume>"],
-    "suggested": ["<strong action verb to add>"]
+    "suggested": ["<strong action verb aligned with target role>"]
   },
   "quantificationScore": <integer 0-10 rating of how well achievements are quantified>,
-  "quantificationTip": "<specific tip on adding numbers/metrics to achievements>"
+  "quantificationTip": "<specific tip on adding numbers/metrics relevant to target role>"
 }
 
 Resume text to analyze:
@@ -76,6 +94,27 @@ export async function POST(request) {
       );
     }
 
+    const dbUser = await db.user.findUnique({
+      where: { clerkUserId: userId },
+      select: {
+        role: true,
+        targetRole: true,
+        targetLevel: true,
+        industry: true,
+        experience: true,
+        skills: true,
+      },
+    });
+
+    const userProfile = {
+      currentRole: dbUser?.role,
+      targetRole: dbUser?.targetRole,
+      targetLevel: dbUser?.targetLevel,
+      industry: dbUser?.industry,
+      experience: dbUser?.experience,
+      skills: dbUser?.skills,
+    };
+
     const buffer = Buffer.from(await file.arrayBuffer());
     let extractedText = "";
 
@@ -98,7 +137,7 @@ export async function POST(request) {
       );
     }
 
-    const result = await model.generateContent(ANALYSIS_PROMPT(extractedText));
+    const result = await model.generateContent(ANALYSIS_PROMPT(extractedText, userProfile));
     const responseText = result.response.text().trim();
 
     let analysis;
@@ -114,7 +153,7 @@ export async function POST(request) {
       );
     }
 
-    return NextResponse.json({ analysis });
+    return NextResponse.json({ analysis, userProfile });
   } catch (error) {
     console.error("Resume upload/analysis error:", error);
     return NextResponse.json(
