@@ -234,7 +234,7 @@ export default function CoursesView({ initialCourses, userContext, filters }) {
       )}
 
       <div className="text-center text-xs text-muted-foreground pt-4">
-        Powered by Google text-embedding-004 · Cosine similarity ranking
+        Powered by Google embedding-001 · Cosine similarity ranking
       </div>
     </div>
   );

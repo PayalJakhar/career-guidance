@@ -7,7 +7,7 @@ config();
 
 const db = new PrismaClient();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const embeddingModel = genAI.getGenerativeModel({ model: "models/text-embedding-004" });
+const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
 
 function buildCourseText(course) {
   return [
