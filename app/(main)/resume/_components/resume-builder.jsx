@@ -19,6 +19,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { saveResume } from "@/actions/resume";
 import { EntryForm } from "./entry-form";
+import ResumeUpload from "./resume-upload";
+import ResumeAnalysis from "./resume-analysis";
 import useFetch from "@/hooks/use-fetch";
 import { useUser } from "@clerk/nextjs";
 import { entriesToMarkdown } from "@/app/lib/helper";
@@ -30,6 +32,7 @@ export default function ResumeBuilder({ initialContent }) {
   const [previewContent, setPreviewContent] = useState(initialContent);
   const { user } = useUser();
   const [resumeMode, setResumeMode] = useState("preview");
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   const {
     control,
@@ -190,6 +193,7 @@ export default function ResumeBuilder({ initialContent }) {
         <TabsList>
           <TabsTrigger value="edit">Form</TabsTrigger>
           <TabsTrigger value="preview">Markdown</TabsTrigger>
+          <TabsTrigger value="analyze">Analyze Resume</TabsTrigger>
         </TabsList>
 
         <TabsContent value="edit">
@@ -412,6 +416,17 @@ export default function ResumeBuilder({ initialContent }) {
               />
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="analyze">
+          {analysisResult ? (
+            <ResumeAnalysis
+              analysis={analysisResult}
+              onReset={() => setAnalysisResult(null)}
+            />
+          ) : (
+            <ResumeUpload onAnalysisComplete={(result) => setAnalysisResult(result)} />
+          )}
         </TabsContent>
       </Tabs>
     </div>

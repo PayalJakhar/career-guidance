@@ -78,6 +78,27 @@ model CoverLetter {
   @@index([userId])
 }
 
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  platform    String
+  provider    String?
+  url         String
+  level       String   // Beginner | Intermediate | Advanced
+  duration    String?
+  price       String?
+  rating      Float?
+  skills      String[]
+  category    String
+  embedding   Float[]  // 768-dim vector from text-embedding-004
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([level])
+}
+
 // Combined Industry Trends and Salary Insights
 model IndustryInsight {
   id            String    @id @default(cuid())
