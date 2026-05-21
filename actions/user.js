@@ -4,6 +4,7 @@ import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { generateAIInsights } from "./dashboard";
+import { inngest } from "@/lib/inngest/client";
 
 export async function updateUser(data) {
   const { userId } = await auth();
@@ -83,6 +84,11 @@ export async function completeProfile({ state, city, currentRole, experience, ta
         targetLevel,
         isOnboarded: true,
       },
+    });
+
+    await inngest.send({
+      name: "user/profile.completed",
+      data: { clerkUserId: userId },
     });
 
     revalidatePath("/");

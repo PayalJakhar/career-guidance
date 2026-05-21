@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { computeRuleBasedGap } from "@/lib/ml/skill-rules";
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -34,6 +35,7 @@ export async function GET() {
         experience: true,
         targetRole: true,
         targetLevel: true,
+        skills: true,
       },
     });
 
@@ -171,6 +173,8 @@ Provide a comprehensive skill gap analysis in the following JSON format (ONLY JS
       throw new Error(`Failed to parse Gemini response: ${parseError.message}`);
     }
 
+    const ruleBasedGap = computeRuleBasedGap(user.skills || [], user.targetRole || "");
+
     return NextResponse.json({
       userData: {
         role: user.role,
@@ -179,6 +183,7 @@ Provide a comprehensive skill gap analysis in the following JSON format (ONLY JS
         targetLevel: user.targetLevel,
       },
       skillGapAnalysis,
+      ruleBasedGap,
     });
   } catch (error) {
     console.error("Skill gap analysis error:", error);

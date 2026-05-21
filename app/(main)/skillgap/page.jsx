@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, TrendingUp, AlertCircle } from "lucide-react";
+import { Loader2, TrendingUp, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import {
   Radar,
   RadarChart,
@@ -19,6 +19,7 @@ export default function SkillGapPage() {
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
   const [skillGapData, setSkillGapData] = useState(null);
+  const [ruleBasedGap, setRuleBasedGap] = useState(null);
 
   useEffect(() => {
     fetchSkillGapAnalysis();
@@ -38,6 +39,7 @@ export default function SkillGapPage() {
 
       setUserData(data.userData);
       setSkillGapData(data.skillGapAnalysis);
+      setRuleBasedGap(data.ruleBasedGap);
     } catch (err) {
       const errorMessage = err.message || "An unexpected error occurred";
       setError(errorMessage);
@@ -152,6 +154,80 @@ export default function SkillGapPage() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        {/* Rule-Based Cosine Similarity Section */}
+        {ruleBasedGap && ruleBasedGap.matchedRole && (
+          <Card className="border-2 border-blue-500/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-500" />
+                Rule-Based Skill Match (Cosine Similarity)
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Your skills vs. required skills for{" "}
+                <span className="font-semibold capitalize">{ruleBasedGap.matchedRole}</span>
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {/* Similarity Score Bar */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">Skill Match Score</span>
+                  <span
+                    className={`text-2xl font-black ${
+                      ruleBasedGap.similarityScore >= 70
+                        ? "text-emerald-500"
+                        : ruleBasedGap.similarityScore >= 40
+                        ? "text-amber-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {ruleBasedGap.similarityScore}%
+                  </span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-3">
+                  <div
+                    className={`h-3 rounded-full transition-all ${
+                      ruleBasedGap.similarityScore >= 70
+                        ? "bg-emerald-500"
+                        : ruleBasedGap.similarityScore >= 40
+                        ? "bg-amber-500"
+                        : "bg-red-500"
+                    }`}
+                    style={{ width: `${ruleBasedGap.similarityScore}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {ruleBasedGap.matchedSkills.length} of {ruleBasedGap.requiredSkills.length} required skills matched
+                </p>
+              </div>
+
+              {/* Skill grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {ruleBasedGap.requiredSkills.map((skill) => {
+                  const matched = ruleBasedGap.matchedSkills.includes(skill);
+                  return (
+                    <div
+                      key={skill}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
+                        matched
+                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                          : "bg-red-500/10 text-red-700 dark:text-red-400"
+                      }`}
+                    >
+                      {matched ? (
+                        <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+                      ) : (
+                        <XCircle className="h-4 w-4 flex-shrink-0" />
+                      )}
+                      <span className="capitalize">{skill}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* AI Analysis */}
         <div className="grid md:grid-cols-2 gap-6">
