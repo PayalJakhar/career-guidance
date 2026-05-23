@@ -30,7 +30,7 @@ export default function SkillGapPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/skillgap");
+      const response = await fetch("/api/inngest/skillgap");
       const data = await response.json();
 
       if (!response.ok) {
