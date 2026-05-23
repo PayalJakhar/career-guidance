@@ -34,8 +34,9 @@ model User {
   // Relations
   skills        String[]  // Array of skills
   assessments   Assessment[]
-  resume        Resume?
-  coverLetter   CoverLetter[]
+  resume             Resume?
+  coverLetter        CoverLetter[]
+  courseInteractions CourseInteraction[]
 }
 
 model Assessment {
@@ -79,24 +80,37 @@ model CoverLetter {
 }
 
 model Course {
-  id          String   @id @default(cuid())
-  title       String
-  description String   @db.Text
-  platform    String
-  provider    String?
-  url         String
-  level       String   // Beginner | Intermediate | Advanced
-  duration    String?
-  price       String?
-  rating      Float?
-  skills      String[]
-  category    String
-  embedding   Float[]  // 768-dim vector from text-embedding-004
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String              @id @default(cuid())
+  title        String
+  description  String              @db.Text
+  platform     String
+  provider     String?
+  url          String
+  level        String
+  duration     String?
+  price        String?
+  rating       Float?
+  skills       String[]
+  category     String
+  embedding    Float[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  interactions CourseInteraction[]
 
   @@index([category])
   @@index([level])
+}
+
+model CourseInteraction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([courseId])
 }
 
 // Combined Industry Trends and Salary Insights

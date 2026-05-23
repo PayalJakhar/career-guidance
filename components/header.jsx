@@ -121,6 +121,7 @@ import {
   StarsIcon,
   TrendingUp,
   BookOpen,
+  BarChart2,
 } from "lucide-react";
 import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
@@ -225,6 +226,13 @@ export default async function Header() {
                   <Link href="/courses" className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     Course Recommendations
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/predictions" className="flex items-center gap-2">
+                    <BarChart2 className="h-4 w-4" />
+                    Predictive Analytics
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>

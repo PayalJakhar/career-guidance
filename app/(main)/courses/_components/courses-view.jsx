@@ -41,6 +41,14 @@ function MatchScoreRing({ score }) {
 }
 
 function CourseCard({ course }) {
+  function handleViewCourse() {
+    fetch("/api/course-interaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ courseId: course.id }),
+    }).catch(() => {});
+  }
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <CardContent className="p-5 space-y-3">
@@ -96,7 +104,7 @@ function CourseCard({ course }) {
           )}
         </div>
 
-        <Button asChild className="w-full" size="sm">
+        <Button asChild className="w-full" size="sm" onClick={handleViewCourse}>
           <a href={course.url} target="_blank" rel="noopener noreferrer">
             View Course
             <ExternalLink className="h-3 w-3 ml-1" />
