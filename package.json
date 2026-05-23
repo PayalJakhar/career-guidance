@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "seed:courses": "node prisma/seed-courses.mjs",
+    "seed:users": "node prisma/seed-users.mjs",
+    "ml:export": "node scripts/export_training_data.mjs",
+    "ml:train": "python3 scripts/train_skill_gap_model.py",
+    "ml:retrain": "npm run ml:export && npm run ml:train",
     "postinstall": "prisma generate"
   },
   "dependencies": {
