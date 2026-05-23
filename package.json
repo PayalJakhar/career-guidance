@@ -11,6 +11,7 @@
     "seed:users": "node prisma/seed-users.mjs",
     "ml:export": "node scripts/export_training_data.mjs",
     "ml:train": "python3 scripts/train_skill_gap_model.py",
+    "ml:compare": "python3 scripts/compare_models.py",
     "ml:retrain": "npm run ml:export && npm run ml:train",
     "postinstall": "prisma generate"
   },
