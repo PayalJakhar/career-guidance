@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 import { computeRuleBasedGap } from "@/lib/ml/skill-rules";
-import { predictSkillMatchScore, buildPredictionTimeline, computeMAE } from "@/lib/ml/predict-skill-gap";
+import { predictSkillMatchScore, buildPredictionTimeline, computeMAE, modelWeights } from "@/lib/ml/predict-skill-gap";
 import { buildVocabulary, tokenize, vectorize, cosineUnit } from "@/lib/ml/tfidf";
 
 async function getTopRecommendedCourseIds(user, k = 5) {
@@ -101,6 +101,12 @@ export async function GET() {
     }
 
     return NextResponse.json({
+      modelInfo: {
+        trainSamples: modelWeights.train_samples,
+        testMAE: modelWeights.test_mae,
+        testR2: modelWeights.test_r2,
+        note: modelWeights.note,
+      },
       skillGapAccuracy: {
         predictedMatch,
         actualMatch,

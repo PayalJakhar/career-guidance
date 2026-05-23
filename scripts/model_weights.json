@@ -1,0 +1,17 @@
+{
+  "features": [
+    "avg_quiz_score",
+    "skills_coverage",
+    "experience_norm"
+  ],
+  "coef": [
+    0.426922,
+    0.332599,
+    0.1846
+  ],
+  "intercept": 3.301194,
+  "train_samples": 240,
+  "test_mae": 3.2124,
+  "test_r2": 0.9228,
+  "note": "Trained on synthetic data. Replace training_data.csv with real DB export and re-run to get production weights."
+}

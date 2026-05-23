@@ -83,7 +83,7 @@ export default function PredictionsPage() {
     );
   }
 
-  const { skillGapAccuracy, recommendationAccuracy } = data;
+  const { skillGapAccuracy, recommendationAccuracy, modelInfo } = data;
   const { predictedMatch, actualMatch, mae, matchedRole, featureContributions, timeline } = skillGapAccuracy;
 
   const featureBarData = [
@@ -109,6 +109,20 @@ export default function PredictionsPage() {
           Model-based predictions vs. actual outcomes for your career profile.
         </p>
       </div>
+
+      {/* Model info banner */}
+      {modelInfo && (
+        <div className="flex items-start gap-3 rounded-xl border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+          <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+          <span>
+            Prediction model: <span className="font-semibold text-foreground">scikit-learn LinearRegression</span>
+            {" "}· Trained on {modelInfo.trainSamples} samples
+            {" "}· Test MAE <span className="font-semibold text-foreground">{modelInfo.testMAE} pp</span>
+            {" "}· R² <span className="font-semibold text-foreground">{modelInfo.testR2}</span>
+            {" "}· {modelInfo.note}
+          </span>
+        </div>
+      )}
 
       {/* ── SECTION 1: Skill Gap Accuracy ── */}
       <section className="space-y-5">
