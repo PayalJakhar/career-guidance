@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Brain, Target, TrendingUp, BarChart2, AlertCircle, Info } from "lucide-react";
+import { Loader2, Brain, Target, TrendingUp, BarChart2, AlertCircle, Info, Trophy } from "lucide-react";
 import { format } from "date-fns";
 import {
   LineChart,
@@ -41,6 +41,94 @@ function colorFor(val) {
   if (val >= 70) return "text-emerald-500";
   if (val >= 40) return "text-amber-500";
   return "text-red-500";
+}
+
+function ModelComparisonTable({ comparison }) {
+  if (!comparison) return null;
+  const best = comparison.best_model;
+  return (
+    <Card className="border-2">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Trophy className="h-4 w-4 text-amber-500" />
+          Model Comparison — Linear Regression vs Random Forest vs XGBoost
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
+                <th className="text-left py-2 pr-4">Model</th>
+                <th className="text-right py-2 px-3">MAE</th>
+                <th className="text-right py-2 px-3">RMSE</th>
+                <th className="text-right py-2 px-3">R²</th>
+                <th className="text-right py-2 pl-3">CV-MAE</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparison.results.map((r) => (
+                <tr
+                  key={r.model}
+                  className={`border-b border-border/50 ${r.model === best ? "bg-primary/5" : ""}`}
+                >
+                  <td className="py-3 pr-4 font-medium flex items-center gap-2">
+                    {r.model === best && (
+                      <span className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded font-semibold">
+                        Best
+                      </span>
+                    )}
+                    {r.model}
+                  </td>
+                  <td className="text-right py-3 px-3 tabular-nums">{r.mae.toFixed(2)}</td>
+                  <td className="text-right py-3 px-3 tabular-nums">{r.rmse.toFixed(2)}</td>
+                  <td className="text-right py-3 px-3 tabular-nums font-semibold">{r.r2.toFixed(4)}</td>
+                  <td className="text-right py-3 pl-3 tabular-nums text-muted-foreground">{r.cv_mae.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Feature importances */}
+        {comparison.feature_importances && Object.keys(comparison.feature_importances).length > 0 && (
+          <div className="space-y-3 pt-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Feature Importances (tree models)
+            </p>
+            {Object.entries(comparison.feature_importances).map(([model, imp]) => (
+              <div key={model}>
+                <p className="text-xs text-muted-foreground mb-1.5">{model}</p>
+                <div className="space-y-1">
+                  {Object.entries(imp).map(([feat, val]) => (
+                    <div key={feat} className="flex items-center gap-2 text-xs">
+                      <span className="w-32 shrink-0 text-muted-foreground truncate">{feat}</span>
+                      <div className="flex-1 bg-muted rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full"
+                          style={{ width: `${Math.round(val * 100)}%` }}
+                        />
+                      </div>
+                      <span className="w-10 text-right font-mono">{(val * 100).toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg p-3 mt-2">
+          <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <span>
+            Trained on {comparison.train_size} rows, tested on {comparison.test_size} rows ({comparison.dataset_size} total).
+            MAE = mean absolute error in percentage points. Lower is better.
+            R² closer to 1.0 = better fit. CV-MAE = 5-fold cross-validation MAE.
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function PredictionsPage() {
@@ -83,8 +171,12 @@ export default function PredictionsPage() {
     );
   }
 
-  const { skillGapAccuracy, recommendationAccuracy, modelInfo } = data;
-  const { predictedMatch, actualMatch, mae, matchedRole, featureContributions, timeline } = skillGapAccuracy;
+  const { skillGapAccuracy, recommendationAccuracy, modelInfo, modelComparison } = data;
+  const {
+    predictedMatch, actualMatch, mae, matchedRole,
+    missingSkills, matchedSkills, hasSkills,
+    featureContributions, timeline,
+  } = skillGapAccuracy;
 
   const featureBarData = [
     { feature: "Avg Quiz Score",  value: featureContributions.quizPerformance },
@@ -120,7 +212,6 @@ export default function PredictionsPage() {
             {" "}· Trained on {modelInfo.trainSamples} samples
             {" "}· Test MAE <span className="font-semibold text-foreground">{modelInfo.testMAE} pp</span>
             {" "}· R² <span className="font-semibold text-foreground">{modelInfo.testR2}</span>
-            {" "}· {modelInfo.note}
           </span>
         </div>
       )}
@@ -146,13 +237,13 @@ export default function PredictionsPage() {
                 label="Predicted Match"
                 value={predictedMatch}
                 color={colorFor(predictedMatch)}
-                note="From quiz avg + experience (ML model)"
+                note="ML model: quiz avg + experience + engagement + role transition"
               />
               <MetricCard
                 label="Actual Match"
                 value={actualMatch}
                 color={colorFor(actualMatch)}
-                note="Rule-based cosine similarity score"
+                note="Rule-based: % of required skills you have listed"
               />
               <MetricCard
                 label="Mean Abs. Error"
@@ -162,12 +253,43 @@ export default function PredictionsPage() {
               />
             </div>
 
+            {/* Actual match = 0 explanation */}
+            {actualMatch === 0 && (
+              <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
+                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-amber-500" />
+                <span className="text-muted-foreground">
+                  <span className="font-semibold text-foreground">Actual Match is 0%</span>
+                  {" "}because {!hasSkills
+                    ? "you have no skills listed on your profile."
+                    : `none of your listed skills match the required skills for ${matchedRole}.`
+                  }
+                  {" "}
+                  <a href="/profile" className="text-primary underline">Update your profile</a> to add skills and improve this score.
+                  {hasSkills && missingSkills?.length > 0 && (
+                    <span className="block mt-1">
+                      Missing skills: <span className="text-foreground font-medium">{missingSkills.slice(0, 5).join(", ")}{missingSkills.length > 5 ? ` +${missingSkills.length - 5} more` : ""}</span>
+                    </span>
+                  )}
+                </span>
+              </div>
+            )}
+
+            {/* MAE explanation */}
+            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
+              <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              <span>
+                <span className="font-semibold text-foreground">MAE</span> = |Predicted − Actual| = |{predictedMatch} − {actualMatch}| = {mae} pp.
+                {" "}The model predicted your match at {predictedMatch}%, but your actual skill coverage is {actualMatch}%.
+                {" "}Model training MAE was {modelInfo?.testMAE} pp, so this gap is within expected range.
+              </span>
+            </div>
+
             {/* Feature contributions */}
             <Card className="border-2">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <BarChart2 className="h-4 w-4" />
-                  Feature Contributions to Predicted Score
+                  Your Feature Values (inputs to the model)
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -195,7 +317,7 @@ export default function PredictionsPage() {
                   <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                   <span>
                     4-feature model: <code className="text-foreground">avg_quiz · experience · quizzes_taken · role_similarity</code>
-                    {" "}— weights learned offline via scikit-learn LinearRegression. Bar shows raw feature values (0–100 scale).
+                    {" "}— weights learned offline via scikit-learn LinearRegression.
                   </span>
                 </div>
               </CardContent>
@@ -261,7 +383,30 @@ export default function PredictionsPage() {
         )}
       </section>
 
-      {/* ── SECTION 2: Recommendation Accuracy ── */}
+      {/* ── SECTION 2: Model Comparison ── */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-6 w-6 text-amber-500" />
+          <h2 className="text-2xl font-bold">Model Comparison</h2>
+        </div>
+        <p className="text-sm text-muted-foreground -mt-2">
+          How Linear Regression, Random Forest, and XGBoost perform on the same 4 features.
+          Run <code className="text-foreground bg-muted px-1 rounded">npm run ml:compare</code> locally to refresh.
+        </p>
+        {modelComparison ? (
+          <ModelComparisonTable comparison={modelComparison} />
+        ) : (
+          <Card className="border border-dashed">
+            <CardContent className="py-10 text-center text-muted-foreground text-sm">
+              No comparison data yet. Run{" "}
+              <code className="text-foreground bg-muted px-1 rounded">npm run ml:compare</code>
+              {" "}to generate it.
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
+      {/* ── SECTION 3: Recommendation Accuracy ── */}
       <section className="space-y-5">
         <div className="flex items-center gap-2">
           <Target className="h-6 w-6 text-primary" />

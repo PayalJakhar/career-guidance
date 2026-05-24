@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { db } from "@/lib/prisma";
 import { computeRuleBasedGap } from "@/lib/ml/skill-rules";
 import { predictSkillMatchScore, buildPredictionTimeline, computeMAE, modelWeights } from "@/lib/ml/predict-skill-gap";
 import { buildVocabulary, tokenize, vectorize, cosineUnit } from "@/lib/ml/tfidf";
+
+function loadModelComparison() {
+  try {
+    const p = resolve(process.cwd(), "scripts/model_comparison.json");
+    return JSON.parse(readFileSync(p, "utf-8"));
+  } catch {
+    return null;
+  }
+}
 
 async function getTopRecommendedCourseIds(user, k = 5) {
   const allCourses = await db.course.findMany({ take: 100 });
@@ -111,11 +122,15 @@ export async function GET() {
         testR2: modelWeights.test_r2,
         note: modelWeights.note,
       },
+      modelComparison: loadModelComparison(),
       skillGapAccuracy: {
         predictedMatch,
         actualMatch,
         mae,
         matchedRole: ruleGap.matchedRole,
+        missingSkills: ruleGap.missingSkills,
+        matchedSkills: ruleGap.matchedSkills,
+        hasSkills: (user.skills || []).length > 0,
         featureContributions: {
           quizPerformance: avgQuizScore,
           experienceFactor: expContribution,
