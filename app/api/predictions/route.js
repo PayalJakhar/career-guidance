@@ -52,20 +52,39 @@ export async function GET() {
     const ruleGap = computeRuleBasedGap(user.skills || [], user.targetRole || "");
     const actualMatch = ruleGap.similarityScore;
     const predictedMatch = predictSkillMatchScore({
-      experience: user.experience || 0,
+      experience:  user.experience || 0,
       assessments,
+      userSkills:  user.skills || [],
+      role:        user.role || "",
+      targetRole:  user.targetRole || "",
     });
     const mae = computeMAE(predictedMatch, actualMatch);
     const timeline = buildPredictionTimeline({
+      userSkills: user.skills || [],
+      role:       user.role || "",
+      targetRole: user.targetRole || "",
       experience: user.experience || 0,
       assessments,
     });
 
-    // Feature contribution breakdown (2 features only — no skills leakage)
+    // Feature values used by the model (6 features)
     const avgQuizScore = assessments.length > 0
       ? Math.round(assessments.reduce((s, a) => s + a.quizScore, 0) / assessments.length)
       : 50;
     const expContribution = Math.round(Math.min((user.experience || 0) / 10, 1) * 100);
+    const quizzesTaken = assessments.length;
+    const sorted = [...assessments].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    const last3 = sorted.slice(-3);
+    const recentQuizAvg = last3.length > 0
+      ? Math.round(last3.reduce((s, a) => s + a.quizScore, 0) / last3.length)
+      : avgQuizScore;
+    const skillsCount = (user.skills || []).length;
+    const roleWords   = (user.role || "").toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const targetWords = (user.targetRole || "").toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const overlap = roleWords.filter(w => targetWords.some(t => t.includes(w) || w.includes(t))).length;
+    const roleSimilarity = roleWords.length > 0 && targetWords.length > 0
+      ? Math.round((overlap / Math.max(roleWords.length, targetWords.length)) * 100)
+      : 50;
 
     // --- Recommendation Accuracy ---
     let interactedCourseIds = [];
@@ -108,6 +127,10 @@ export async function GET() {
         featureContributions: {
           quizPerformance: avgQuizScore,
           experienceFactor: expContribution,
+          quizzesTaken,
+          recentQuizAvg,
+          skillsCount,
+          roleSimilarity,
         },
         timeline,
       },

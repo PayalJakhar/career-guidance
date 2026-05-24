@@ -49,11 +49,15 @@ def main():
     rows = load_csv(DATA_PATH)
     print(f"Loaded {len(rows)} training rows from {DATA_PATH}")
 
-    # Features: quiz score + experience only (skills_coverage is the label)
+    # Features: 6 inputs — skills_coverage is the label, not a feature
     X = np.array([
         [
             r["avg_quiz_score"],
             min(r["experience_years"] / 10, 1.0) * 100,
+            r["quizzes_taken"],
+            r["recent_quiz_avg"],
+            r["skills_count"],
+            r["role_similarity"],
         ]
         for r in rows
     ])
@@ -74,11 +78,18 @@ def main():
     print(f"  MAE  : {mae:.2f} percentage points")
     print(f"  R²   : {r2:.4f}")
     print(f"\n── Learned Coefficients ──────────────")
-    features = ["avg_quiz_score", "experience_norm"]
+    features = [
+        "avg_quiz_score", "experience_norm", "quizzes_taken",
+        "recent_quiz_avg", "skills_count", "role_similarity",
+    ]
     for name, coef in zip(features, model.coef_):
         print(f"  {name:25s}: {coef:.4f}")
     print(f"  {'intercept':25s}: {model.intercept_:.4f}")
 
+    features = [
+        "avg_quiz_score", "experience_norm", "quizzes_taken",
+        "recent_quiz_avg", "skills_count", "role_similarity",
+    ]
     weights = {
         "features": features,
         "coef": [round(float(c), 6) for c in model.coef_],
@@ -87,8 +98,9 @@ def main():
         "test_mae": round(mae, 4),
         "test_r2": round(r2, 4),
         "note": (
-            "Predicts skills_coverage from quiz score + experience only. "
-            "skills_coverage is the label (rule-based cosine similarity). "
+            "Predicts skills_coverage from 6 features (quiz, experience, quizzes_taken, "
+            "recent_quiz_avg, skills_count, role_similarity). "
+            "skills_coverage is the label only — no leakage. "
             "Re-run after exporting real DB data for production weights."
         ),
     }

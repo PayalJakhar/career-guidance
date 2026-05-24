@@ -36,11 +36,15 @@ def load_csv(path):
 
 
 def build_features(rows):
-    # Features: quiz + experience only — skills_coverage is the label
+    # 6 features — skills_coverage is the label, not a feature
     X = np.array([
         [
             r["avg_quiz_score"],
             min(r["experience_years"] / 10, 1.0) * 100,
+            r["quizzes_taken"],
+            r["recent_quiz_avg"],
+            r["skills_count"],
+            r["role_similarity"],
         ]
         for r in rows
     ])
@@ -112,7 +116,7 @@ def main():
     print(f"\n✔  Best model: {best['model']}  (MAE = {best['mae']}, R² = {best['r2']})")
 
     # ── Feature importances for RF and XGBoost ─────────────────────────────
-    features = ["avg_quiz_score", "experience_norm"]
+    features = ["avg_quiz_score", "experience_norm", "quizzes_taken", "recent_quiz_avg", "skills_count", "role_similarity"]
     importances = {}
     for name, model in models:
         if hasattr(model, "feature_importances_"):
@@ -144,7 +148,7 @@ def main():
     lr_model = next(m for name, m in models if name == "Linear Regression")
     lr_result = next(r for r in results if r["model"] == "Linear Regression")
     weights = {
-        "features":      ["avg_quiz_score", "experience_norm"],
+        "features":      ["avg_quiz_score", "experience_norm", "quizzes_taken", "recent_quiz_avg", "skills_count", "role_similarity"],
         "coef":          [round(float(c), 6) for c in lr_model.coef_],
         "intercept":     round(float(lr_model.intercept_), 6),
         "train_samples": int(len(X_train)),

@@ -68,6 +68,16 @@ function computeSkillsCoverage(userSkills, targetRole) {
   return Math.round((matched.length / required.length) * 100);
 }
 
+function computeRoleSimilarity(role, targetRole) {
+  const roleWords   = (role || "").toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const targetWords = (targetRole || "").toLowerCase().trim().split(/\s+/).filter(Boolean);
+  if (!roleWords.length || !targetWords.length) return 50;
+  const overlap = roleWords.filter(w =>
+    targetWords.some(t => t.includes(w) || w.includes(t))
+  ).length;
+  return Math.round((overlap / Math.max(roleWords.length, targetWords.length)) * 100);
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   const users = await db.user.findMany({
@@ -78,8 +88,12 @@ async function main() {
     select: {
       skills: true,
       experience: true,
+      role: true,
       targetRole: true,
-      assessments: { select: { quizScore: true } },
+      assessments: {
+        select: { quizScore: true, createdAt: true },
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 
@@ -91,6 +105,13 @@ async function main() {
     if (!u.assessments.length) continue;
 
     const avgQuiz = u.assessments.reduce((s, a) => s + a.quizScore, 0) / u.assessments.length;
+
+    const last3       = u.assessments.slice(-3);
+    const recentAvg   = last3.reduce((s, a) => s + a.quizScore, 0) / last3.length;
+    const quizzesTaken = u.assessments.length;
+    const skillsCount  = (u.skills || []).length;
+    const roleSim      = computeRoleSimilarity(u.role, u.targetRole);
+
     // Label = skills_coverage (independent of quiz — no leakage)
     const actualMatch = computeSkillsCoverage(u.skills, u.targetRole);
     if (actualMatch === null) continue;
@@ -98,6 +119,10 @@ async function main() {
     rows.push({
       avg_quiz_score:   Math.round(avgQuiz * 10) / 10,
       experience_years: u.experience,
+      quizzes_taken:    quizzesTaken,
+      recent_quiz_avg:  Math.round(recentAvg * 10) / 10,
+      skills_count:     skillsCount,
+      role_similarity:  roleSim,
       actual_match:     actualMatch,
     });
   }
@@ -109,9 +134,9 @@ async function main() {
 
   const outPath = resolve(__dirname, "training_data.csv");
   const stream  = createWriteStream(outPath);
-  stream.write("avg_quiz_score,experience_years,actual_match\n");
+  stream.write("avg_quiz_score,experience_years,quizzes_taken,recent_quiz_avg,skills_count,role_similarity,actual_match\n");
   for (const r of rows) {
-    stream.write(`${r.avg_quiz_score},${r.experience_years},${r.actual_match}\n`);
+    stream.write(`${r.avg_quiz_score},${r.experience_years},${r.quizzes_taken},${r.recent_quiz_avg},${r.skills_count},${r.role_similarity},${r.actual_match}\n`);
   }
   stream.end();
 
