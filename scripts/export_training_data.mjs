@@ -120,8 +120,6 @@ async function main() {
       avg_quiz_score:   Math.round(avgQuiz * 10) / 10,
       experience_years: u.experience,
       quizzes_taken:    quizzesTaken,
-      recent_quiz_avg:  Math.round(recentAvg * 10) / 10,
-      skills_count:     skillsCount,
       role_similarity:  roleSim,
       actual_match:     actualMatch,
     });
@@ -134,9 +132,9 @@ async function main() {
 
   const outPath = resolve(__dirname, "training_data.csv");
   const stream  = createWriteStream(outPath);
-  stream.write("avg_quiz_score,experience_years,quizzes_taken,recent_quiz_avg,skills_count,role_similarity,actual_match\n");
+  stream.write("avg_quiz_score,experience_years,quizzes_taken,role_similarity,actual_match\n");
   for (const r of rows) {
-    stream.write(`${r.avg_quiz_score},${r.experience_years},${r.quizzes_taken},${r.recent_quiz_avg},${r.skills_count},${r.role_similarity},${r.actual_match}\n`);
+    stream.write(`${r.avg_quiz_score},${r.experience_years},${r.quizzes_taken},${r.role_similarity},${r.actual_match}\n`);
   }
   stream.end();
 

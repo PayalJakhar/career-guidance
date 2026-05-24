@@ -87,12 +87,10 @@ export default function PredictionsPage() {
   const { predictedMatch, actualMatch, mae, matchedRole, featureContributions, timeline } = skillGapAccuracy;
 
   const featureBarData = [
-    { feature: "Avg Quiz Score",   value: featureContributions.quizPerformance },
-    { feature: "Experience",       value: featureContributions.experienceFactor },
-    { feature: "Quizzes Taken",    value: Math.min(featureContributions.quizzesTaken * 5, 100) },
-    { feature: "Recent Quiz Avg",  value: featureContributions.recentQuizAvg },
-    { feature: "Skills Count",     value: Math.min(featureContributions.skillsCount * 5, 100) },
-    { feature: "Role Similarity",  value: featureContributions.roleSimilarity },
+    { feature: "Avg Quiz Score",  value: featureContributions.quizPerformance },
+    { feature: "Experience",      value: featureContributions.experienceFactor },
+    { feature: "Quizzes Taken",   value: Math.min(featureContributions.quizzesTaken * 5, 100) },
+    { feature: "Role Similarity", value: featureContributions.roleSimilarity },
   ];
 
   const timelineChartData = timeline.map((t) => ({
@@ -196,7 +194,7 @@ export default function PredictionsPage() {
                 <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg p-3">
                   <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                   <span>
-                    6-feature model: <code className="text-foreground">avg_quiz · experience · quizzes_taken · recent_quiz_avg · skills_count · role_similarity</code>
+                    4-feature model: <code className="text-foreground">avg_quiz · experience · quizzes_taken · role_similarity</code>
                     {" "}— weights learned offline via scikit-learn LinearRegression. Bar shows raw feature values (0–100 scale).
                   </span>
                 </div>
