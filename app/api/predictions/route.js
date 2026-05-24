@@ -52,25 +52,18 @@ export async function GET() {
     const ruleGap = computeRuleBasedGap(user.skills || [], user.targetRole || "");
     const actualMatch = ruleGap.similarityScore;
     const predictedMatch = predictSkillMatchScore({
-      userSkills: user.skills || [],
-      targetRole: user.targetRole || "",
       experience: user.experience || 0,
       assessments,
     });
     const mae = computeMAE(predictedMatch, actualMatch);
     const timeline = buildPredictionTimeline({
-      userSkills: user.skills || [],
-      targetRole: user.targetRole || "",
       experience: user.experience || 0,
       assessments,
     });
 
-    // Feature contribution breakdown for transparency
+    // Feature contribution breakdown (2 features only — no skills leakage)
     const avgQuizScore = assessments.length > 0
       ? Math.round(assessments.reduce((s, a) => s + a.quizScore, 0) / assessments.length)
-      : 50;
-    const skillsCoverage = ruleGap.requiredSkills.length > 0
-      ? Math.round((ruleGap.matchedSkills.length / ruleGap.requiredSkills.length) * 100)
       : 50;
     const expContribution = Math.round(Math.min((user.experience || 0) / 10, 1) * 100);
 
@@ -114,7 +107,6 @@ export async function GET() {
         matchedRole: ruleGap.matchedRole,
         featureContributions: {
           quizPerformance: avgQuizScore,
-          skillsCoverage,
           experienceFactor: expContribution,
         },
         timeline,

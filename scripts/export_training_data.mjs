@@ -1,13 +1,13 @@
 /**
- * Reads all users (seed + real) from the database, computes the 4 training
- * columns, and writes them to scripts/training_data.csv for use by
- * scripts/train_skill_gap_model.py.
+ * Reads all users (seed + real) from the database and writes training_data.csv.
  *
  * Columns exported:
- *   avg_quiz_score    — average of all the user's quiz scores
- *   skills_coverage   — (matched skills / required skills) × 100
- *   experience_years  — years of experience from user profile
- *   actual_match      — composite of skills_coverage + quiz (the label)
+ *   avg_quiz_score   — average of all the user's quiz scores (feature)
+ *   experience_years — years of experience from user profile (feature)
+ *   actual_match     — skills_coverage from rule-based cosine similarity (label)
+ *
+ * skills_coverage is the LABEL only — not a feature — to avoid data leakage.
+ * The model's job: predict skill match from quiz performance + experience alone.
  *
  * Run:  node scripts/export_training_data.mjs
  */
@@ -91,18 +91,12 @@ async function main() {
     if (!u.assessments.length) continue;
 
     const avgQuiz = u.assessments.reduce((s, a) => s + a.quizScore, 0) / u.assessments.length;
-    const skillsCoverage = computeSkillsCoverage(u.skills, u.targetRole);
-    if (skillsCoverage === null) continue;
-
-    // Label: composite of demonstrated knowledge (quiz) + listed skills
-    const actualMatch = Math.min(
-      Math.round(0.6 * skillsCoverage + 0.4 * avgQuiz),
-      100
-    );
+    // Label = skills_coverage (independent of quiz — no leakage)
+    const actualMatch = computeSkillsCoverage(u.skills, u.targetRole);
+    if (actualMatch === null) continue;
 
     rows.push({
       avg_quiz_score:   Math.round(avgQuiz * 10) / 10,
-      skills_coverage:  skillsCoverage,
       experience_years: u.experience,
       actual_match:     actualMatch,
     });
@@ -115,9 +109,9 @@ async function main() {
 
   const outPath = resolve(__dirname, "training_data.csv");
   const stream  = createWriteStream(outPath);
-  stream.write("avg_quiz_score,skills_coverage,experience_years,actual_match\n");
+  stream.write("avg_quiz_score,experience_years,actual_match\n");
   for (const r of rows) {
-    stream.write(`${r.avg_quiz_score},${r.skills_coverage},${r.experience_years},${r.actual_match}\n`);
+    stream.write(`${r.avg_quiz_score},${r.experience_years},${r.actual_match}\n`);
   }
   stream.end();
 

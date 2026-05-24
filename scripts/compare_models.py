@@ -36,10 +36,10 @@ def load_csv(path):
 
 
 def build_features(rows):
+    # Features: quiz + experience only — skills_coverage is the label
     X = np.array([
         [
             r["avg_quiz_score"],
-            r["skills_coverage"],
             min(r["experience_years"] / 10, 1.0) * 100,
         ]
         for r in rows
@@ -112,7 +112,7 @@ def main():
     print(f"\n✔  Best model: {best['model']}  (MAE = {best['mae']}, R² = {best['r2']})")
 
     # ── Feature importances for RF and XGBoost ─────────────────────────────
-    features = ["avg_quiz_score", "skills_coverage", "experience_norm"]
+    features = ["avg_quiz_score", "experience_norm"]
     importances = {}
     for name, model in models:
         if hasattr(model, "feature_importances_"):
@@ -141,12 +141,10 @@ def main():
     print(f"\nComparison saved → {OUTPUT_PATH}")
 
     # ── Update model_weights.json with Linear Regression coefficients ───────
-    # (Linear Regression weights are used by Node.js; RF/XGBoost need ONNX
-    #  for production export — see docs for that upgrade path)
     lr_model = next(m for name, m in models if name == "Linear Regression")
     lr_result = next(r for r in results if r["model"] == "Linear Regression")
     weights = {
-        "features":      features,
+        "features":      ["avg_quiz_score", "experience_norm"],
         "coef":          [round(float(c), 6) for c in lr_model.coef_],
         "intercept":     round(float(lr_model.intercept_), 6),
         "train_samples": int(len(X_train)),
@@ -154,8 +152,8 @@ def main():
         "test_r2":       lr_result["r2"],
         "note": (
             f"Best overall model: {best['model']} (MAE={best['mae']}). "
-            "Node.js currently uses Linear Regression weights. "
-            "Replace with ONNX export for RF/XGBoost in production."
+            "Predicts skills_coverage from quiz + experience (no leakage). "
+            "Node.js uses Linear Regression weights for inference."
         ),
     }
     with open(WEIGHTS_PATH, "w") as f:

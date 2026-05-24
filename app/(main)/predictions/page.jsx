@@ -87,9 +87,8 @@ export default function PredictionsPage() {
   const { predictedMatch, actualMatch, mae, matchedRole, featureContributions, timeline } = skillGapAccuracy;
 
   const featureBarData = [
-    { feature: "Quiz Performance", value: featureContributions.quizPerformance, weight: "50%" },
-    { feature: "Skills Coverage", value: featureContributions.skillsCoverage, weight: "30%" },
-    { feature: "Experience", value: featureContributions.experienceFactor, weight: "20%" },
+    { feature: "Quiz Performance", value: featureContributions.quizPerformance },
+    { feature: "Experience", value: featureContributions.experienceFactor },
   ];
 
   const timelineChartData = timeline.map((t) => ({
@@ -136,7 +135,7 @@ export default function PredictionsPage() {
             <p className="text-sm text-muted-foreground -mt-2">
               Predicting skill match for{" "}
               <span className="font-semibold text-foreground capitalize">{matchedRole}</span> using
-              quiz scores, skills coverage, and experience.
+              quiz scores and experience (no skill data — avoids label leakage).
             </p>
 
             {/* Summary cards */}
@@ -145,7 +144,7 @@ export default function PredictionsPage() {
                 label="Predicted Match"
                 value={predictedMatch}
                 color={colorFor(predictedMatch)}
-                note="From quiz avg + skills + experience"
+                note="From quiz avg + experience (ML model)"
               />
               <MetricCard
                 label="Actual Match"
@@ -181,7 +180,6 @@ export default function PredictionsPage() {
                           active && payload?.length ? (
                             <div className="bg-background border rounded-xl p-3 shadow text-sm">
                               <p className="font-semibold">{payload[0].payload.feature}</p>
-                              <p className="text-muted-foreground text-xs">Weight: {payload[0].payload.weight}</p>
                               <p className="font-bold text-primary">{payload[0].value}%</p>
                             </div>
                           ) : null
@@ -194,7 +192,8 @@ export default function PredictionsPage() {
                 <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg p-3">
                   <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                   <span>
-                    Prediction formula: <code className="text-foreground">Quiz × 0.5 + Skills × 0.3 + Experience × 0.2</code>
+                    Prediction formula: <code className="text-foreground">coef[0] × AvgQuizScore + coef[1] × ExperienceNorm + intercept</code>
+                    {" "}— weights learned offline via scikit-learn LinearRegression on real DB exports.
                   </span>
                 </div>
               </CardContent>

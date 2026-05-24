@@ -49,11 +49,10 @@ def main():
     rows = load_csv(DATA_PATH)
     print(f"Loaded {len(rows)} training rows from {DATA_PATH}")
 
-    # Build feature matrix — normalise experience to 0–100
+    # Features: quiz score + experience only (skills_coverage is the label)
     X = np.array([
         [
             r["avg_quiz_score"],
-            r["skills_coverage"],
             min(r["experience_years"] / 10, 1.0) * 100,
         ]
         for r in rows
@@ -75,7 +74,7 @@ def main():
     print(f"  MAE  : {mae:.2f} percentage points")
     print(f"  R²   : {r2:.4f}")
     print(f"\n── Learned Coefficients ──────────────")
-    features = ["avg_quiz_score", "skills_coverage", "experience_norm"]
+    features = ["avg_quiz_score", "experience_norm"]
     for name, coef in zip(features, model.coef_):
         print(f"  {name:25s}: {coef:.4f}")
     print(f"  {'intercept':25s}: {model.intercept_:.4f}")
@@ -88,8 +87,9 @@ def main():
         "test_mae": round(mae, 4),
         "test_r2": round(r2, 4),
         "note": (
-            "Trained on synthetic data. Replace training_data.csv with real "
-            "DB export and re-run to get production weights."
+            "Predicts skills_coverage from quiz score + experience only. "
+            "skills_coverage is the label (rule-based cosine similarity). "
+            "Re-run after exporting real DB data for production weights."
         ),
     }
 
