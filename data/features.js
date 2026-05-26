@@ -4,7 +4,7 @@ export const features = [
     image: "/images/features/ai-career.png",
     icon: "brain",
     description: "Personalized AI career roadmap tailored to your goals.",
-    route: "/dashboard",
+    route: "/jobs",
   },
   {
     title: "Knowledge Check",
