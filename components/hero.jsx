@@ -1,122 +1,89 @@
-
 "use client";
 
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { features } from "@/data/features";
-
 import {
   Brain,
   Briefcase,
   BarChart3,
   FileText,
+  Mail,
+  Target,
 } from "lucide-react";
 
-/* icon name → component */
 const iconMap = {
-  brain: Brain,
+  brain:     Brain,
   briefcase: Briefcase,
-  chart: BarChart3,
-  file: FileText,
+  chart:     BarChart3,
+  file:      FileText,
+  mail:      Mail,
+  target:    Target,
 };
 
 const HeroSection = () => {
   return (
-    <section className="relative w-full pt-28 pb-24 px-4 md:px-6 overflow-hidden">
+    <section className="w-full bg-black">
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+      {/* ── 3×2 FEATURE CARD GRID ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
+        {features.map((feature, index) => {
+          const Icon = iconMap[feature.icon];
+          return (
+            <Link key={index} href={feature.route} className="group block">
+              <div className="relative h-[220px] md:h-[260px] overflow-hidden cursor-pointer">
 
-        {/* LEFT SIDE */}
-        <div className="space-y-8 text-left">
-          <h1 className="text-5xl md:text-6xl font-bold gradient-title animate-gradient">
-            Your AI Career Coach
-          </h1>
+                {/* Background image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                  style={{
+                    backgroundImage: `url(${feature.image})`,
+                  }}
+                />
 
-          <p className="text-muted-foreground md:text-xl max-w-[550px]">
-            Personalized guidance and AI-powered tools for job success.
-          </p>
+                {/* Dark gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:from-black/70 transition-all duration-300" />
 
-          <div className="flex gap-4">
-            <Link href="/dashboard">
-              <Button size="lg">Get Started</Button>
-            </Link>
+                {/* Cyan border glow on hover */}
+                <div className="absolute inset-0 border-2 border-transparent group-hover:border-cyan-400/60 transition-all duration-300" />
 
-            <Button size="lg" variant="outline">
-              Learn More
-            </Button>
-          </div>
-        </div>
+                {/* Content */}
+                <div className="absolute inset-0 p-5 flex flex-col justify-between">
+                  {/* Icon badge */}
+                  <div className="w-fit p-2 rounded-lg bg-black/40 border border-white/20 backdrop-blur-sm">
+                    {Icon && <Icon className="h-5 w-5 text-cyan-300" />}
+                  </div>
 
-        {/* RIGHT SIDE – BENTO GRID */}
-        <div className="grid grid-cols-2 grid-rows-6 gap-3 h-[420px] md:h-[480px]">
-          {features.slice(0, 4).map((feature, index) => {
-            const gridSpans = [
-              "row-span-2",
-              "row-span-2",
-              "row-span-3",
-              "row-span-2",
-            ];
-
-            const Icon = iconMap[feature.icon];
-
-            return (
-              <Link
-                key={index}
-                href={feature.route}   // ✅ SAFE STRING ROUTE
-                className={`${gridSpans[index]} block`}
-              >
-                <Card className="group relative h-full overflow-hidden border-none shadow-xl transition-all hover:scale-[1.02] bg-slate-900 cursor-pointer">
-
-                  {/* BACKGROUND IMAGE */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                    style={{
-                      backgroundImage: `url(${feature.image})`,
-                      filter: "brightness(0.75) contrast(1.05)",
-                    }}
-                  />
-
-                  {/* OVERLAY */}
-                  <div className="absolute inset-0 bg-black/25" />
-
-                  <CardContent className="relative z-10 h-full p-4 flex flex-col justify-end text-white">
-                    <div className="mb-2 w-fit p-2 bg-white/15 rounded-lg border border-white/25">
-                      {Icon && <Icon className="h-6 w-6" />}
-                    </div>
-
-                    <h3 className="text-lg font-semibold">
+                  {/* Title + description */}
+                  <div>
+                    <h3 className="text-white font-bold text-lg leading-tight">
                       {feature.title}
                     </h3>
+                    {feature.description && (
+                      <p className="text-gray-300 text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {feature.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-                    <p className="text-xs text-gray-200 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
-      {/* DASHBOARD PREVIEW IMAGE */}
-      <div className="relative mt-[-40px] md:mt-[-60px] z-0">
-        <div className="max-w-6xl mx-auto px-4 overflow-hidden">
-          <div className="max-h-[260px] md:max-h-[320px] overflow-hidden rounded-xl">
-            <Image
-              src="/banner.jpeg"
-              width={1280}
-              height={720}
-              alt="Dashboard Preview"
-              className="rounded-xl shadow-2xl border mx-auto"
-              priority
-            />
-          </div>
-        </div>
+      {/* ── FULL-WIDTH BANNER IMAGE ── */}
+      <div className="w-full">
+        <Image
+          src="/banner.jpeg"
+          width={1920}
+          height={600}
+          alt="Dashboard Preview"
+          className="w-full object-cover"
+          priority
+        />
       </div>
 
     </section>

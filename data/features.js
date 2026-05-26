@@ -1,32 +1,44 @@
-import { Brain, Briefcase, BarChart3, FileText } from "lucide-react";
-
 export const features = [
   {
     title: "AI Career Guidance",
     image: "/images/features/ai-career.png",
     icon: "brain",
-    description: "Personalized AI career roadmap",
+    description: "Personalized AI career roadmap tailored to your goals.",
     route: "/dashboard",
   },
   {
-    title: "Interview Preparation",
+    title: "Knowledge Check",
     image: "/images/features/interview.png",
     icon: "briefcase",
-    description: "AI mock interviews",
+    description: "Practice Questions with AI feedback.",
     route: "/interview",
   },
   {
-    title: "Industry Insights",
+    title: "Market Trends",
     image: "/images/features/industry.png",
     icon: "chart",
-    description: "Market & salary trends",
+    description: "Real-time industry insights and salary benchmarks.",
     route: "/dashboard",
   },
   {
-    title: "Smart Resume Builder",
+    title: "Smart Resume Creation",
     image: "/images/features/resume.png",
     icon: "file",
-    description: "AI-powered resume creation",
+    description: "AI-powered resume builder with ATS optimization.",
     route: "/resume",
-  }
+  },
+  {
+    title: "Cover Letter Builder",
+    image: "/images/features/resume.png",
+    icon: "mail",
+    description: "Generate tailored cover letters in seconds.",
+    route: "/ai-cover-letter",
+  },
+  {
+    title: "Skill Gap Analysis",
+    image: "/images/features/ai-career.png",
+    icon: "target",
+    description: "Identify missing skills and get a learning path.",
+    route: "/skillgap",
+  },
 ];
