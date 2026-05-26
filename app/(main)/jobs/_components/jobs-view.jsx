@@ -53,7 +53,7 @@ function JobCard({ job }) {
       </div>
 
       {/* Meta row */}
-      <div className="px-5 pb-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+      <div className="px-5 pb-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
           <MapPin className="h-3.5 w-3.5 shrink-0" />
           {job.location}
@@ -77,12 +77,15 @@ function JobCard({ job }) {
       </div>
 
       {/* Description */}
-      <p className="px-5 pb-3 text-xs text-muted-foreground leading-relaxed line-clamp-2">
+      <p className="px-5 pb-4 text-xs text-muted-foreground leading-relaxed min-h-[2.5rem]">
         {job.description}
       </p>
 
+      {/* Divider */}
+      <div className="mx-5 border-t border-border mb-3" />
+
       {/* Skills */}
-      <div className="px-5 pb-4 flex flex-wrap gap-1.5">
+      <div className="px-5 pb-4 flex flex-wrap gap-1.5 min-h-[2rem]">
         {job.skills.slice(0, 4).map((skill, i) => (
           <span
             key={skill}
