@@ -24,15 +24,15 @@ const iconMap = {
 
 const HeroSection = () => {
   return (
-    <section className="w-full bg-black">
+    <section className="w-full bg-black pt-28 pb-8 px-6">
 
       {/* ── 3×2 FEATURE CARD GRID ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {features.map((feature, index) => {
           const Icon = iconMap[feature.icon];
           return (
             <Link key={index} href={feature.route} className="group block">
-              <div className="relative h-[220px] md:h-[260px] overflow-hidden cursor-pointer">
+              <div className="relative h-[220px] md:h-[260px] overflow-hidden cursor-pointer rounded-xl">
 
                 {/* Background image */}
                 <div
@@ -46,7 +46,7 @@ const HeroSection = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:from-black/70 transition-all duration-300" />
 
                 {/* Cyan border glow on hover */}
-                <div className="absolute inset-0 border-2 border-transparent group-hover:border-cyan-400/60 transition-all duration-300" />
+                <div className="absolute inset-0 border-2 border-transparent group-hover:border-cyan-400/60 rounded-xl transition-all duration-300" />
 
                 {/* Content */}
                 <div className="absolute inset-0 p-5 flex flex-col justify-between">
@@ -75,13 +75,13 @@ const HeroSection = () => {
       </div>
 
       {/* ── FULL-WIDTH BANNER IMAGE ── */}
-      <div className="w-full">
+      <div className="max-w-7xl mx-auto rounded-xl overflow-hidden">
         <Image
           src="/banner.jpeg"
           width={1920}
           height={600}
           alt="Dashboard Preview"
-          className="w-full object-cover"
+          className="w-full object-cover rounded-xl"
           priority
         />
       </div>
