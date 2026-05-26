@@ -26,7 +26,7 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 
-const DashboardView = ({ insights }) => {
+const DashboardView = ({ insights, pipelineInsight, pipelineRanAt, targetRole }) => {
   const salaryData = insights.salaryRanges.map((range) => ({
     name: range.role,
     min: range.min / 1000,
@@ -79,6 +79,33 @@ const DashboardView = ({ insights }) => {
 
   return (
     <div className="space-y-6">
+
+      {/* ── AI CAREER INSIGHT (pipeline-generated) ── */}
+      {pipelineInsight && (
+        <div className="flex items-start gap-4 rounded-2xl border-2 border-primary/20 bg-primary/5 p-5">
+          <div className="shrink-0 rounded-xl bg-primary/10 p-2.5">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                Your AI Career Insight
+                {targetRole && (
+                  <span className="ml-2 normal-case text-muted-foreground font-normal capitalize">
+                    — {targetRole}
+                  </span>
+                )}
+              </p>
+              {pipelineRanAt && (
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {formatDistanceToNow(new Date(pipelineRanAt), { addSuffix: true })}
+                </span>
+              )}
+            </div>
+            <p className="text-sm leading-relaxed text-foreground/90">{pipelineInsight}</p>
+          </div>
+        </div>
+      )}
 
       {/* ── HERO BANNER ── */}
       <div

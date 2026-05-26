@@ -37,6 +37,8 @@ model User {
   resume             Resume?
   coverLetter        CoverLetter[]
   courseInteractions CourseInteraction[]
+  pipelineInsight  String?
+  pipelineRanAt    DateTime?
 }
 
 model Assessment {
